@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html class="ui-mobile">
+    <link rel="stylesheet" type="text/css" href="bower_components/jquery-mobile-bower/css/jquery.mobile-1.4.5.min.css">
+<head lang="en">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Contact list</title>
+</head>
+<body class="ui-mobile-viewport ui-overlay-a">
+    <div data-role="page">
+        <div data-role="header">...</div>
+        <div role="main" class="ui-content container">
+            <ul class="ui-li-has-thumb" data-role="listview"></ul>
+        </div>
+        <div data-role="footer">...</div>
+    </div>
+
+</body>
+    <script id="contact-template" type="text/x-handlebars-template">
+    <li >
+        <a href="#">
+            <img src="{{imagePath}}">
+            <h1>{{name}}</h1>
+            <p>{{phone}}</p>
+        </a>
+    </li>
+    </script>
+
+    <script src="bower_components/handlebars/handlebars.min.js"></script>
+    <script src="bower_components/jquery/jquery.min.js"></script>
+    <script src="bower_components/jquery-mobile-bower/js/jquery.mobile-1.4.5.min.js"></script>
+    <script src="bower_components/underscore/underscore-min.js"></script>
+    <script>
+        $(function () {
+            var template = Handlebars.compile($('#contact-template').html());
+
+            $.get('https://solstice.applauncher.com/external/contacts.json', function (response) {
+
+                _.each(response, function(contact) {
+                    $('.container ul').append(
+                        template({
+                            name: contact.name
+                            , phone: contact.phone.home
+                            , imagePath:  contact.smallImageURL
+                        })
+                    );
+                });
+
+            })
+        });
+    </script>
+</html>
+
