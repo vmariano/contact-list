@@ -26,18 +26,6 @@
 
 <!-- Start of second page -->
 <div data-role="page" id="bar">
-    <div data-role="header">
-        <h1>Bar</h1>
-    </div><!-- /header -->
-
-    <div role="main" class="ui-content">
-        <p>I'm the second in the source order so I'm hidden when the page loads. I'm just shown if a link that references my id is beeing clicked.</p>
-        <p><a href="#foo">Back to foo</a></p>
-    </div><!-- /content -->
-
-    <div data-role="footer">
-        <h4>Page Footer</h4>
-    </div><!-- /footer -->
 </div><!-- /page -->
 </body>
 <script id="contact-template" type="text/x-handlebars-template">
@@ -46,8 +34,28 @@
             <img src="{{imagePath}}">
             <h1>{{name}}</h1>
             <p>{{phone}}</p>
+            <input type="hidden" value="{{detailsURL}}">
         </a>
     </li>
+</script>
+
+<script id="full-contact-template" type="text/x-handlebars-template">
+    <div data-role="header">
+        <h1>Contact Details</h1>
+    </div>
+    <div role="main" class="ui-content">
+        <img src="{{smallImageURL}}">
+        <p>Favorite: {{favorite}}</p>
+        <p>Name: {{name}}</p>
+        <p>Company: {{company}}</p>
+        <p>Phone: {{phone.home}} home</p>
+        <p>Adress: {{address.street}},
+            {{address.city}},{{address.state}}
+        </p>
+        <p>Birthday: {{birthdate}}</p>
+        <p>Email: {{email}}</p>
+    </div><!-- /content -->
+    <p style="text-align:center;"><a href="#foo">Back</a></p>
 </script>
 
 <script src="bower_components/handlebars/handlebars.min.js"></script>
@@ -55,24 +63,37 @@
 <script src="bower_components/jquery-mobile-bower/js/jquery.mobile-1.4.5.min.js"></script>
 <script src="bower_components/underscore/underscore-min.js"></script>
 <script>
-    $(document).on( "ready", function() {
-//    $(document).on('pageinit', function() {
+    $(function() {
+        $.mobile.pushStateEnabled = true;
         var template = Handlebars.compile($('#contact-template').html());
         $.get('https://solstice.applauncher.com/external/contacts.json', function (response) {
             var contactList = $('#contactList');
             _.each(response, function(contact) {
-                        console.log(contact);
-                contactList.append(
-                        template({
-                              name: contact.name
-                            , phone: contact.phone.home
-                            , imagePath:  contact.smallImageURL
-                        })
-                )
+                var contactElement =  $(template({
+                    name: contact.name
+                    , phone: contact.phone.home
+                    , imagePath:  contact.smallImageURL
+                    , detailsURL: contact.detailsURL
+                }));
+                contactList.append(contactElement);
+                contactElement.on('click', function() {
+                    var element = $(this);
+                    var url = element.find('input').val();
+                    $.get(url, function (response) {
+                        event.preventDefault();
+                        var fullContact = $.extend({},contact,response);
+                        var template = Handlebars.compile($('#full-contact-template').html());
+                        $('#bar')
+                                .html('')
+                                .append(template(fullContact));
+                        $.mobile.navigate('#bar');
+                    });
+
+                });
             });
-            contactList.listview( "refresh" );
-        })
+            contactList.listview("refresh");
+            console.log('termine')
+        });
     });
 </script>
 </html>
-
