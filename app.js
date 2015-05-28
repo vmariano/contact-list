@@ -1,19 +1,33 @@
+
+var Contact = Backbone.Model.extend({});
+
+var Contacts = Backbone.Collection.extend({
+    url: 'https://solstice.applauncher.com/external/contacts.json',
+    model: Contact
+});
+
+
+var contactList = new Contacts();
+var response =  contactList.fetch();
+
+
+
 $(function() {
-   
     $.mobile.pushStateEnabled = true;
     var template = Handlebars.compile($('#contact-template').html());
-   
-    $.get('https://solstice.applauncher.com/external/contacts.json', function (response) {
-        var contactList = $('#contactList');
-        _.each(response, function(contact) {
+    var contactListEl = $('#contactList');
+
+    response.then(function () {
+        contactList.each(function(contact) {
             var contactElement =  $(template({
-                name: contact.name
-                , phone: contact.phone.home
-                , imagePath:  contact.smallImageURL
-                , detailsURL: contact.detailsURL
+                name: contact.attributes.name
+                , phone: contact.attributes.phone.home
+                , imagePath:  contact.attributes.smallImageURL
+                , detailsURL: contact.attributes.detailsURL
             }));
-            contactList.append(contactElement);
-   
+
+            contactListEl.append(contactElement);
+
             contactElement.on('click', function() {
                 var element = $(this);
                 var url = element.find('input').val();
@@ -28,6 +42,6 @@ $(function() {
                 });
             });
         });
-        contactList.listview("refresh");
+        contactListEl.listview("refresh");
     });
 });
